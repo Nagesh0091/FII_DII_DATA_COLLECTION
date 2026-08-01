@@ -61,6 +61,9 @@ log = logging.getLogger(__name__)
 
 def fetch_html() -> str:
     resp = requests.get(URL, headers=HEADERS, timeout=30)
+    log.info("HTTP status: %s", resp.status_code)
+    if resp.status_code != 200:
+        log.error("Non-200 response. First 500 chars of body:\n%s", resp.text[:500])
     resp.raise_for_status()
     return resp.text
 
@@ -85,7 +88,11 @@ def extract_cash_rows(html: str):
     soup = BeautifulSoup(html, "lxml")
     tables = soup.find_all("table")
     if not tables:
-        raise RuntimeError("No <table> elements found on the page - site layout may have changed.")
+        log.error("No <table> elements found. First 800 chars of HTML received:\n%s", html[:800])
+        raise RuntimeError(
+            "No <table> elements found on the page - either the site layout changed, "
+            "or the request was blocked (e.g. bot-detection/CAPTCHA page returned instead of the real page)."
+        )
 
     # The first table on the page is the "current month" live table.
     table = tables[0]
@@ -158,22 +165,26 @@ def append_new_rows(rows):
     return len(new_rows)
 
 
-def main():
+def main() -> int:
     log.info("Starting FII/DII cash-segment scrape...")
     try:
         html = fetch_html()
         rows = extract_cash_rows(html)
         log.info("Parsed %d date rows from page (current month table).", len(rows))
         if not rows:
-            log.error("Zero rows parsed - the site's HTML structure may have changed. "
-                       "Open the page manually and check the table.")
-            return
+            log.info("No dated rows in the current month's table yet. This is normal in the "
+                      "first day or two of a new month, before the first trading day's data "
+                      "is published. Nothing to add today - this is not an error.")
+            return 0
         append_new_rows(rows)
+        return 0
     except requests.RequestException as e:
         log.error("Network/HTTP error while fetching page: %s", e)
+        return 1
     except Exception as e:
         log.exception("Unexpected error: %s", e)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
