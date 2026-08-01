@@ -27,16 +27,27 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run scraper
+        id: run_scraper
         run: python fii_dii_scraper.py
+        continue-on-error: true   # let us commit scraper.log even if the scrape failed
 
       - name: Commit and push if data changed
         run: |
           git config user.name "fii-dii-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add fii_dii_cash_history.csv scraper.log
+          git add scraper.log
+          if [ -f fii_dii_cash_history.csv ]; then
+            git add fii_dii_cash_history.csv
+          fi
           if git diff --cached --quiet; then
             echo "No new data - nothing to commit."
           else
             git commit -m "Daily FII/DII data update: $(date -u +'%Y-%m-%d')"
             git push
           fi
+
+      - name: Fail the job if the scraper actually errored
+        if: steps.run_scraper.outcome == 'failure'
+        run: |
+          echo "The scraper reported a real error (not just 'no data yet') - check scraper.log."
+          exit 1
