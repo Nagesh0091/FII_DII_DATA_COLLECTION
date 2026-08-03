@@ -2,3 +2,7 @@
 2026-08-01 04:58:05,904 [INFO] HTTP status: 200
 2026-08-01 04:58:06,143 [INFO] Parsed 0 date rows from page (current month table).
 2026-08-01 04:58:06,143 [INFO] No dated rows in the current month's table yet. This is normal in the first day or two of a new month, before the first trading day's data is published. Nothing to add today - this is not an error.
+2026-08-03 15:59:33,623 [INFO] Starting FII/DII cash-segment scrape...
+2026-08-03 15:59:34,562 [INFO] HTTP status: 200
+2026-08-03 15:59:34,811 [INFO] Parsed 1 date rows from page (current month table).
+2026-08-03 15:59:34,811 [INFO] Added 1 new row(s): ['2026-08-03']
