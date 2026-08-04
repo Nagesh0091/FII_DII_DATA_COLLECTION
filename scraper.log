@@ -6,3 +6,7 @@
 2026-08-03 15:59:34,562 [INFO] HTTP status: 200
 2026-08-03 15:59:34,811 [INFO] Parsed 1 date rows from page (current month table).
 2026-08-03 15:59:34,811 [INFO] Added 1 new row(s): ['2026-08-03']
+2026-08-04 15:41:58,106 [INFO] Starting FII/DII cash-segment scrape...
+2026-08-04 15:41:58,256 [INFO] HTTP status: 200
+2026-08-04 15:41:58,523 [INFO] Parsed 2 date rows from page (current month table).
+2026-08-04 15:41:58,523 [INFO] Added 1 new row(s): ['2026-08-04']
