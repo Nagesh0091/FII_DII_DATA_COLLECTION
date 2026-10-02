@@ -178,3 +178,7 @@
 2026-10-01 18:56:32,452 [INFO] HTTP status: 200
 2026-10-01 18:56:32,699 [INFO] Parsed 1 date rows from page (current month table).
 2026-10-01 18:56:32,699 [INFO] Added 1 new row(s): ['2026-10-01']
+2026-10-02 18:32:45,878 [INFO] Starting FII/DII cash-segment scrape...
+2026-10-02 18:32:46,223 [INFO] HTTP status: 200
+2026-10-02 18:32:46,333 [INFO] Parsed 1 date rows from page (current month table).
+2026-10-02 18:32:46,333 [INFO] No new dates to add. CSV is already up to date.
