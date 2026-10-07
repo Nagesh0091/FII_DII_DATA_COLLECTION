@@ -190,3 +190,7 @@
 2026-10-06 18:57:08,339 [INFO] HTTP status: 200
 2026-10-06 18:57:08,629 [INFO] Parsed 3 date rows from page (current month table).
 2026-10-06 18:57:08,629 [INFO] Added 1 new row(s): ['2026-10-06']
+2026-10-07 19:24:45,445 [INFO] Starting FII/DII cash-segment scrape...
+2026-10-07 19:24:47,044 [INFO] HTTP status: 200
+2026-10-07 19:24:47,278 [INFO] Parsed 4 date rows from page (current month table).
+2026-10-07 19:24:47,279 [INFO] Added 1 new row(s): ['2026-10-07']
