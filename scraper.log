@@ -294,3 +294,7 @@
 2026-11-11 20:15:37,824 [INFO] HTTP status: 200
 2026-11-11 20:15:37,974 [INFO] Parsed 8 date rows from page (current month table).
 2026-11-11 20:15:37,974 [INFO] Added 1 new row(s): ['2026-11-11']
+2026-11-12 20:57:51,102 [INFO] Starting FII/DII cash-segment scrape...
+2026-11-12 20:57:51,927 [INFO] HTTP status: 200
+2026-11-12 20:57:52,104 [INFO] Parsed 9 date rows from page (current month table).
+2026-11-12 20:57:52,104 [INFO] Added 1 new row(s): ['2026-11-12']
