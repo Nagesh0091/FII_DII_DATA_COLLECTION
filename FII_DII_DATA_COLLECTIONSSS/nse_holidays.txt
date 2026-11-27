@@ -1,0 +1,14 @@
+# NSE trading holidays that fall on weekdays - one date per line (YYYY-MM-DD).
+# Text after the date is ignored. check_missing.py uses this so it does not
+# raise a false "missing data" alarm on market holidays.
+# Add every new holiday here (check the NSE holiday list).
+
+2026-09-14   Ganesh Chaturthi        (seen as a gap in your data)
+2026-10-02   Gandhi Jayanti          (seen as a gap in your data)
+2026-10-20   Dussehra                (seen as a gap in your data)
+2026-11-10   Diwali Balipratipada    (seen as a gap in your data)
+2026-11-24   Guru Nanak Jayanti      (seen as a gap in your data)
+2026-12-25   Christmas               (VERIFY against the NSE list)
+
+# 2026-08-31 is a gap in your data that is NOT confirmed as a holiday.
+# Check it; if it was a real trading day, the data is lost (page had rolled over).
