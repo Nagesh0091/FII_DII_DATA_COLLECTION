@@ -51,8 +51,13 @@ jobs:
             echo "No new data - nothing to commit."
           else
             git commit -m "Daily FII/DII data update: $(date -u +'%Y-%m-%d')"
-            git pull --rebase
-            git push
+            for i in 1 2 3; do
+              git pull --rebase --autostash && git push && exit 0
+              echo "Push attempt $i failed - retrying in 10s..."
+              sleep 10
+            done
+            echo "Could not push after 3 attempts."
+            exit 1
           fi
 
       - name: Save log if scraper failed
