@@ -1,14 +1,14 @@
+
 name: FII DII Daily Scrape
 
 on:
   schedule:
     # Cron is UTC (IST = UTC + 5:30), Mon-Fri.
-    # Three runs per day. The scraper skips dates it already has, so extra runs
-    # are free - and they protect against a missed run, especially at month-end
-    # (the source page only shows the current month).
+    # Three runs per day.
     - cron: "0 13 * * 1-5"    # 6:30 PM IST
     - cron: "30 14 * * 1-5"   # 8:00 PM IST
-    - cron: "0 16 * * 1-5"    # 9:30 PM IST  (final run - also does the missing-day check)
+    - cron: "0 16 * * 1-5"    # 9:30 PM IST (final run)
+
   workflow_dispatch: {}
 
 permissions:
@@ -22,6 +22,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -35,44 +36,102 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # -------------------------------
+      # STEP 1: RUN DAILY SCRAPER
+      # -------------------------------
       - name: Run scraper
         id: run_scraper
         run: python fii_dii_scraper.py
-        continue-on-error: true   # still commit any good rows even if one row failed
+        continue-on-error: true
 
+      # -------------------------------
+      # STEP 2: SAVE UPDATED CSV
+      # -------------------------------
       - name: Commit and push if data changed
         run: |
           git config user.name "fii-dii-bot"
           git config user.email "actions@users.noreply.github.com"
+
           if [ -f fii_dii_cash_history.csv ]; then
             git add fii_dii_cash_history.csv
           fi
+
           if git diff --cached --quiet; then
             echo "No new data - nothing to commit."
           else
             git commit -m "Daily FII/DII data update: $(date -u +'%Y-%m-%d')"
+
             for i in 1 2 3; do
               git pull --rebase --autostash && git push && exit 0
               echo "Push attempt $i failed - retrying in 10s..."
               sleep 10
             done
+
             echo "Could not push after 3 attempts."
             exit 1
           fi
 
+      # -------------------------------
+      # STEP 3: KEEP STREAMLIT APPS AWAKE
+      # -------------------------------
+      - name: Keep Streamlit Applications Awake
+        run: |
+          urls=(
+            "https://fii-dii.streamlit.app/"
+            "https://fii-dii-ds.streamlit.app/"
+          )
+
+          for url in "${urls[@]}"; do
+            echo "Checking application: $url"
+            success=0
+
+            for attempt in 1 2 3; do
+              status=$(curl -L -sS -o /dev/null \
+                -w "%{http_code}" \
+                --max-time 60 "$url" || true)
+
+              case "$status" in
+                2??|3??)
+                  echo "Application responded successfully: HTTP $status"
+                  success=1
+                  break
+                  ;;
+                *)
+                  echo "Attempt $attempt failed. HTTP status: ${status:-No response}"
+                  sleep 20
+                  ;;
+              esac
+            done
+
+            if [ "$success" -eq 0 ]; then
+              echo "WARNING: Application did not respond successfully: $url"
+            fi
+          done
+
+      # -------------------------------
+      # STEP 4: SAVE SCRAPER LOG IF FAILED
+      # -------------------------------
       - name: Save log if scraper failed
         if: steps.run_scraper.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: scraper-log
           path: scraper.log
+          if-no-files-found: warn
 
-      - name: Fail the job if the scraper errored
-        if: steps.run_scraper.outcome == 'failure'
-        run: |
-          echo "The scraper reported a real error - download the 'scraper-log' artifact."
-          exit 1
-
+      # -------------------------------
+      # STEP 5: MISSING-DAY VALIDATION
+      # -------------------------------
       - name: Missing-day check (final run of the day only)
         if: github.event_name == 'schedule' && github.event.schedule == '0 16 * * 1-5'
         run: python check_missing.py
+
+      # -------------------------------
+      # STEP 6: REPORT SCRAPER FAILURE
+      # -------------------------------
+      - name: Fail the job if the scraper errored
+        if: always() && steps.run_scraper.outcome == 'failure'
+        run: |
+          echo "The scraper reported a real error."
+          echo "Download the scraper-log artifact for details."
+          exit 1
